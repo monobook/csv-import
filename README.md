@@ -40,5 +40,5 @@ $ bin/console app:import-products filepath
 ## Testing
 
 ``` bash
-$ bin/phpunit tests
+$ ./vendor/bin/simple-phpunit tests
 ```
