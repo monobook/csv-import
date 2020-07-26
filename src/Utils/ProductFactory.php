@@ -16,7 +16,7 @@ class ProductFactory
     {
         $product = new Product();
         $product->setSku($productDTO->sku);
-        $product->setDescription($productDTO->description);
+        $product->setDescription(strip_tags($productDTO->description));
         $product->setNormalPrice($productDTO->normalPrice);
         $product->setSpecialPrice($productDTO->specialPrice);
 

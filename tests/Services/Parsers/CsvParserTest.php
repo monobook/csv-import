@@ -5,7 +5,6 @@ namespace App\Tests\Services\Parsers;
 use App\Services\Parsers\CsvParser;
 use Generator;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 
 class CsvParserTest extends TestCase
 {
@@ -20,57 +19,39 @@ class CsvParserTest extends TestCase
     }
 
     /**
-     * @dataProvider getValidDataProvider
+     * @dataProvider getDataProvider
      *
      * @param $file
+     * @param $skipHeaders
      * @param $count
+     * @param $valid
      */
-    public function testParseValid($file, $count): void
+    public function testParse($file, $skipHeaders, $count, $valid): void
     {
         $path = sprintf('%s/files/%s', __DIR__, $file);
 
-        $products = [];
-        foreach ($this->instance->parse($path) as $productDTO) {
-            $products[] = $productDTO;
+        $parsedRows = [];
+        $validRows = [];
+        foreach ($this->instance->parse($path, $skipHeaders) as $row) {
+            $parsedRows[] = $row;
+            if ($row->isValid()) {
+                $validRows[] = $row;
+            }
         }
 
-        self::assertCount($count, $products);
-    }
-
-    /**
-     * @dataProvider getNotValidDataProvider
-     *
-     * @param $file
-     */
-    public function testParseNotValid($file): void
-    {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('File not valid for parse');
-
-        $path = sprintf('%s/files/%s', __DIR__, $file);
-
-        $products = [];
-        foreach ($this->instance->parse($path) as $productDTO) {
-            $products[] = $productDTO;
-        }
+        self::assertCount($count, $parsedRows);
+        self::assertCount($valid, $validRows);
     }
 
     /**
      * @return Generator
      */
-    public function getValidDataProvider(): ?Generator
+    public function getDataProvider(): ?Generator
     {
-        yield ['file' => 'valid.csv', 'count' => 2];
-    }
-
-    /**
-     * @return Generator
-     */
-    public function getNotValidDataProvider(): ?Generator
-    {
-        yield ['file' => 'empty.csv'];
-        yield ['file' => 'not_enough.csv'];
-        yield ['file' => 'not_valid.csv'];
-        yield ['file' => 'not_valid_position.csv'];
+        yield ['file' => 'valid.csv', 'skipHeaders' => true, 'count' => 2, 'valid' => 2];
+        yield ['file' => 'valid_without_headers.csv', 'skipHeaders' => false, 'count' => 2, 'valid' => 2];
+        yield ['file' => 'empty.csv', 'skipHeaders' => true, 'count' => 0, 'valid' => 0];
+        yield ['file' => 'with_not_valid.csv', 'skipHeaders' => true, 'count' => 3, 'valid' => 1];
+        yield ['file' => 'with_not_valid_without_headers.csv', 'skipHeaders' => false, 'count' => 4, 'valid' => 2];
     }
 }

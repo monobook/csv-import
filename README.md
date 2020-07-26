@@ -37,6 +37,10 @@ NB: You could find example file there ```data/demo.csv```
 $ bin/console app:import-products filepath
 ```
 
+If file has headers row use `--skip-headers` to skip this line.
+
+Important: To show error messages use `-v` option
+
 ## Testing
 
 ``` bash
