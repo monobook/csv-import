@@ -205,6 +205,8 @@ class ImportProductsCommand extends Command
         if (!$this->isUpdated($existed, $productDTO)) {
             $result->addSkipped();
 
+            $this->em->clear();
+
             return;
         }
 

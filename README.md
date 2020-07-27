@@ -41,6 +41,9 @@ If file has headers row use `--skip-headers` to skip this line.
 
 Important: To show error messages use `-v` option
 
+#### Memory leaks
+To prevent memory leaks use `APP_ENV=prod` in .env or set `--no-debug` option for command. 
+
 ## Testing
 
 ``` bash
