@@ -19,10 +19,26 @@ class ProductFactoryTest extends TestCase
 
         $product = ProductFactory::fromProductDTO($productDTO);
 
-        self::assertEquals($product->getSku(), $productDTO->sku);
-        self::assertEquals($product->getDescription(), $productDTO->description);
-        self::assertEquals($product->getNormalPrice(), $productDTO->normalPrice);
-        self::assertEquals($product->getSpecialPrice(), $productDTO->specialPrice);
+        self::assertEquals($productDTO->sku, $product->getSku());
+        self::assertEquals($productDTO->description, $product->getDescription());
+        self::assertEquals($productDTO->normalPrice, $product->getNormalPrice());
+        self::assertEquals($productDTO->specialPrice, $product->getSpecialPrice());
+    }
+
+    public function testFromProductDTOWithTags(): void
+    {
+        $productDTO = new ProductDTO();
+        $productDTO->sku = 'sku123';
+        $productDTO->description = '<javascript>some code</javascript>';
+        $productDTO->normalPrice = 12.99;
+        $productDTO->specialPrice = null;
+
+        $product = ProductFactory::fromProductDTO($productDTO);
+
+        self::assertEquals($productDTO->sku, $product->getSku());
+        self::assertEquals('some code', $product->getDescription());
+        self::assertEquals($productDTO->normalPrice, $product->getNormalPrice());
+        self::assertEquals($productDTO->specialPrice, $product->getSpecialPrice());
     }
 
     public function testFromProductDTOWithEmpty(): void
