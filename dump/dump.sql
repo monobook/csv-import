@@ -1,1 +1,1 @@
-CREATE DATABASE app;
+CREATE TABLE foo (id int);

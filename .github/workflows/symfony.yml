@@ -5,6 +5,11 @@ on:
     branches:
       - master
 
+env:
+  DB_NAME: app
+  DB_PASSWORD: root
+  DB_USERNAME: root
+
 jobs:
   symfony:
     name: Symfony (PHP ${{ matrix.php-versions }})
@@ -15,10 +20,8 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
         ports:
-          - '3306:3306'
-        options: '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3'
-        volumes:
-          - './dump:/docker-entrypoint-initdb.d'
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       fail-fast: true
       matrix:
@@ -35,7 +38,15 @@ jobs:
           update: true
       - name: Install deps
         run: composer install
-      - name:
+      - name: Verify MySQL connection from container
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports['3306'] }} -u$DB_USERNAME -p$DB_PASSWORD -e "SHOW DATABASES"
+      - name: Create DB
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports['3306'] }} -u$DB_USERNAME -p$DB_PASSWORD -e "CREATE DATABASE $DB_NAME"
+      - name: Restore dump
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports['3306'] }} -u$DB_USERNAME -p$DB_PASSWORD  $DB_NAME < ./dump/dump.sql
+      - name: Execute migrations
         run: bin/console doctrine:migrations:migrate --no-interaction
+      - name: Verify MySQL connection from container (show tables once again)
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports['3306'] }} -u$DB_USERNAME -p$DB_PASSWORD -e "SHOW DATABASES"
       - name: Tests
         run: ./vendor/bin/simple-phpunit tests
